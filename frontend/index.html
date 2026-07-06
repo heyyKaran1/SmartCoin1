@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptocurrency Dashboard - Advanced Blockchain System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>🪙 Cryptocurrency Dashboard</h1>
+                <p class="subtitle">Advanced Blockchain System with ECDSA Signatures & UTXO Model</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-card">
+                    <span class="stat-label">Total Supply</span>
+                    <span class="stat-value" id="totalSupply">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Total Blocks</span>
+                    <span class="stat-value" id="totalBlocks">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Difficulty</span>
+                    <span class="stat-value" id="difficulty">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Chain Valid</span>
+                    <span class="stat-value" id="chainValid">✅</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <section class="card">
+                    <h2>👛 Wallet Manager</h2>
+                    <button class="btn btn-primary" onclick="createWallet()">Create New Wallet</button>
+
+                    <div id="walletList" class="wallet-list"></div>
+
+                    <div class="balance-checker">
+                        <h3>Check Balance</h3>
+                        <input type="text" id="addressInput" placeholder="Enter wallet address" class="input-field">
+                        <button class="btn btn-secondary" onclick="checkBalance()">Check Balance</button>
+                        <div id="balanceResult"></div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2>💸 Send Transaction</h2>
+                    <form id="transactionForm" onsubmit="sendTransaction(event)">
+                        <label>From Wallet:</label>
+                        <select id="fromWallet" class="input-field" required>
+                            <option value="">Select wallet...</option>
+                        </select>
+
+                        <label>To Address:</label>
+                        <input type="text" id="toAddress" class="input-field" placeholder="Recipient address" required>
+
+                        <label>Amount:</label>
+                        <input type="number" id="amount" class="input-field" placeholder="0.00" step="0.01" min="0.01" required>
+
+                        <label>Fee:</label>
+                        <input type="number" id="fee" class="input-field" placeholder="0.1" step="0.01" value="0.1" required>
+
+                        <button type="submit" class="btn btn-primary">Send Transaction</button>
+                    </form>
+                    <div id="txResult"></div>
+                </section>
+
+                <section class="card">
+                    <h2>⛏️ Mining</h2>
+                    <p>Mine a new block and receive rewards!</p>
+                    <select id="minerWallet" class="input-field">
+                        <option value="">Select miner wallet...</option>
+                    </select>
+                    <button class="btn btn-success" onclick="mineBlock()">Mine Block</button>
+                    <div id="miningResult"></div>
+                </section>
+            </div>
+
+            <div class="right-panel">
+                <section class="card">
+                    <h2>📊 Blockchain Statistics</h2>
+                    <div id="blockchainStats" class="stats-grid"></div>
+                </section>
+
+                <section class="card">
+                    <h2>⛓️ Recent Blocks</h2>
+                    <div id="blocksList" class="blocks-list"></div>
+                </section>
+
+                <section class="card">
+                    <h2>📝 Mempool</h2>
+                    <div id="mempool" class="mempool-list">
+                        <p class="empty-state">No pending transactions</p>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
