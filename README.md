@@ -15,7 +15,12 @@ pip install -r requirements.txt
 ```bash
 ./start_frontend.sh
 ```
-Then open: http://localhost:5000
+
+**Two Dashboards Available:**
+- **Blockchain Dashboard:** http://localhost:5000
+- **SmartCoin Token:** http://localhost:5000/smartcoin.html
+
+(Use navigation links at the top to switch between them)
 
 ### Run CLI Demo
 ```bash

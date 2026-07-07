@@ -1,6 +1,8 @@
 const API_URL = 'http://localhost:5000/api';
 let wallets = [];
 let refreshInterval;
+let blockchainChart = null;
+let miningChart = null;
 
 function showNotification(message, type = 'info') {
     const notification = document.getElementById('notification');
@@ -76,9 +78,93 @@ async function loadBlockchainInfo() {
                 <span>${(info.average_block_time || 0).toFixed(2)}s</span>
             </div>
         `;
+
+        createBlockchainChart(info);
+        createMiningChart(info);
     } catch (error) {
         console.error('Failed to load blockchain info:', error);
     }
+}
+
+async function createBlockchainChart(info) {
+    const ctx = document.getElementById('blockchainChart');
+    if (!ctx) return;
+    if (blockchainChart) blockchainChart.destroy();
+
+    try {
+        const response = await fetch(`${API_URL}/blockchain/history`);
+        const historyData = await response.json();
+        const history = historyData.history || [];
+
+        const labels = history.map(b => `Block ${b.index}`);
+        const data = history.map(b => b.transaction_count);
+
+        if (labels.length === 0) {
+            labels.push('No data');
+            data.push(0);
+        }
+
+    blockchainChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Transactions',
+                data: data,
+                backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                borderColor: '#667eea',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+    } catch (error) {
+        console.error('Failed to load blockchain history:', error);
+    }
+}
+
+function createMiningChart(info) {
+    const ctx = document.getElementById('miningChart');
+    if (!ctx) return;
+    if (miningChart) miningChart.destroy();
+
+    const difficulty = info.difficulty || 2;
+    const labels = ['Block 1', 'Block 5', 'Block 10', 'Block 15', 'Current'];
+    const difficulties = [2, 2, Math.max(2, difficulty - 0.5), Math.max(2, difficulty - 0.2), difficulty];
+
+    miningChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Difficulty',
+                data: difficulties,
+                borderColor: '#764ba2',
+                backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5,
+                pointBackgroundColor: '#764ba2'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
 }
 
 async function loadBlocks() {
@@ -194,12 +280,17 @@ async function checkBalance() {
         const data = await apiCall(`/balance/${address}`);
 
         const result = document.getElementById('balanceResult');
-        result.className = 'info-message';
+        result.className = 'success-message';
         result.innerHTML = `
-            <strong>Balance: ${data.balance} coins</strong><br>
-            Address: ${data.address}<br>
-            UTXOs: ${data.utxo_count}
+            <div style="font-size: 1.2rem; margin-bottom: 10px;">
+                <strong>💰 Balance: ${data.balance} coins</strong>
+            </div>
+            <div style="font-size: 0.9rem; color: #666;">
+                <strong>Address:</strong> ${data.address}<br>
+                <strong>UTXOs:</strong> ${data.utxo_count}
+            </div>
         `;
+        showNotification(`Balance: ${data.balance} coins`, 'success');
     } catch (error) {
         const result = document.getElementById('balanceResult');
         result.className = 'error-message';
@@ -323,7 +414,19 @@ function startAutoRefresh() {
     }, 5000);
 }
 
+function toggleTheme() {
+    document.body.classList.toggle('dark-theme');
+    const isDark = document.body.classList.contains('dark-theme');
+    document.getElementById('themeToggle').checked = isDark;
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+
 window.addEventListener('load', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        document.getElementById('themeToggle').checked = true;
+    }
     startAutoRefresh();
     displayWallets();
     showNotification('Dashboard loaded successfully!', 'success');

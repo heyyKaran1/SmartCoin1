@@ -3,6 +3,9 @@ from flask_cors import CORS
 from advanced_blockchain import AdvancedBlockchain
 from advanced_wallet import AdvancedWallet
 from database import Database
+from erc20_token import TokenManager
+from smart_contract import ContractManager
+from staking import StakingPool
 import threading
 import os
 
@@ -11,7 +14,40 @@ CORS(app)
 
 blockchain = AdvancedBlockchain(difficulty=2, block_reward=50.0)
 database = Database("blockchain.db")
+token_manager = TokenManager()
+contract_manager = ContractManager()
+staking_pool = StakingPool(apy=10.0)  # 10% APY
 wallets = {}
+
+# Initialize SmartCoin Token
+SMARTCOIN_TOKEN = None
+SMARTCOIN_PRICE_INR = 10  # 1 SMC = ₹10
+SMARTCOIN_PRICE_USD = 0.12  # 1 SMC = $0.12
+SMARTCOIN_CONTRACT_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+NETWORK = "Polygon Amoy Testnet"
+
+def initialize_smartcoin():
+    global SMARTCOIN_TOKEN
+    if not SMARTCOIN_TOKEN:
+        SMARTCOIN_TOKEN = token_manager.create_token(
+            name="SmartCoin",
+            symbol="SMC",
+            total_supply=100000000,  # 100 million
+            creator_address="GENESIS"
+        )
+    return SMARTCOIN_TOKEN
+
+initialize_smartcoin()
+
+# Tokenomics Distribution
+TOKENOMICS = {
+    "Public Sale": 40,
+    "Team": 20,
+    "Staking Rewards": 15,
+    "Treasury": 15,
+    "Marketing": 5,
+    "Reserve": 5
+}
 
 
 @app.route('/')
@@ -203,21 +239,298 @@ def get_stats():
     })
 
 
+@app.route('/api/blockchain/history', methods=['GET'])
+def get_blockchain_history():
+    blocks = blockchain.chain[-20:] if len(blockchain.chain) > 20 else blockchain.chain
+    history = []
+    for block in blocks:
+        history.append({
+            'index': block.index,
+            'transaction_count': len(block.transactions),
+            'timestamp': block.timestamp,
+            'difficulty': blockchain.difficulty
+        })
+    return jsonify({'history': history})
+
+
+# ===== SmartCoin Token Endpoints =====
+
+@app.route('/api/smartcoin/info', methods=['GET'])
+def get_smartcoin_info():
+    token = initialize_smartcoin()
+    circulating_supply = sum(token.balances.values()) - token.balance_of("GENESIS")
+    market_cap_inr = circulating_supply * SMARTCOIN_PRICE_INR
+    market_cap_usd = circulating_supply * SMARTCOIN_PRICE_USD
+
+    return jsonify({
+        'name': token.name,
+        'symbol': token.symbol,
+        'total_supply': token.total_supply,
+        'circulating_supply': circulating_supply,
+        'decimals': token.decimals,
+        'price_inr': SMARTCOIN_PRICE_INR,
+        'price_usd': SMARTCOIN_PRICE_USD,
+        'market_cap_inr': market_cap_inr,
+        'market_cap_usd': market_cap_usd,
+        'contract_address': SMARTCOIN_CONTRACT_ADDRESS,
+        'network': NETWORK,
+        'holders': len(token.balances),
+        'tokenomics': TOKENOMICS,
+        'blockchain_height': len(blockchain.chain),
+        'transaction_count': token.transaction_count,
+        'paused': token.paused
+    })
+
+
+@app.route('/api/smartcoin/balance/<address>', methods=['GET'])
+def get_smartcoin_balance(address):
+    token = initialize_smartcoin()
+    balance = token.balance_of(address)
+    value_inr = balance * SMARTCOIN_PRICE_INR
+    value_usd = balance * SMARTCOIN_PRICE_USD
+
+    return jsonify({
+        'address': address,
+        'balance': balance,
+        'symbol': 'SMC',
+        'value_inr': value_inr,
+        'value_usd': value_usd
+    })
+
+
+@app.route('/api/smartcoin/transfer', methods=['POST'])
+def transfer_smartcoin():
+    data = request.json
+    from_address = data.get('from_address')
+    to_address = data.get('to_address')
+    amount = data.get('amount')
+
+    token = initialize_smartcoin()
+    success = token.transfer(from_address, to_address, amount)
+
+    if success:
+        return jsonify({
+            'success': True,
+            'message': f'Transferred {amount} SMC',
+            'from': from_address,
+            'to': to_address,
+            'amount': amount
+        })
+
+    return jsonify({'success': False, 'error': 'Transfer failed'}), 400
+
+
+@app.route('/api/smartcoin/mint', methods=['POST'])
+def mint_smartcoin():
+    data = request.json
+    to_address = data.get('to_address')
+    amount = data.get('amount')
+
+    token = initialize_smartcoin()
+    success = token.mint(to_address, amount)
+
+    if success:
+        return jsonify({
+            'success': True,
+            'message': f'Minted {amount} SMC to {to_address}',
+            'amount': amount
+        })
+
+    return jsonify({'success': False, 'error': 'Minting failed'}), 400
+
+
+@app.route('/api/smartcoin/burn', methods=['POST'])
+def burn_smartcoin():
+    data = request.json
+    from_address = data.get('from_address')
+    amount = data.get('amount')
+
+    token = initialize_smartcoin()
+    success = token.burn(from_address, amount)
+
+    if success:
+        return jsonify({
+            'success': True,
+            'message': f'Burned {amount} SMC from {from_address}',
+            'amount': amount
+        })
+
+    return jsonify({'success': False, 'error': 'Burn failed'}), 400
+
+
+@app.route('/api/smartcoin/history', methods=['GET'])
+def get_transaction_history():
+    token = initialize_smartcoin()
+    limit = request.args.get('limit', default=50, type=int)
+    address = request.args.get('address')
+
+    history = token.transaction_history[-limit:]
+
+    if address:
+        history = [tx for tx in history if tx['from'] == address or tx['to'] == address]
+
+    return jsonify({
+        'count': len(history),
+        'transactions': list(reversed(history))
+    })
+
+
+@app.route('/api/smartcoin/activity', methods=['GET'])
+def get_live_activity():
+    token = initialize_smartcoin()
+    limit = request.args.get('limit', default=10, type=int)
+
+    recent = token.transaction_history[-limit:]
+
+    return jsonify({
+        'activity': list(reversed(recent))
+    })
+
+
+# ===== Smart Contract Endpoints =====
+
+@app.route('/api/contract/deploy', methods=['POST'])
+def deploy_contract():
+    data = request.json
+    creator = data.get('creator')
+    code = data.get('code', 'SmartCoin Contract')
+    initial_state = data.get('initial_state', {})
+
+    contract_id = contract_manager.deploy_contract(creator, code, initial_state)
+
+    return jsonify({
+        'success': True,
+        'contract_id': contract_id,
+        'contract_address': SMARTCOIN_CONTRACT_ADDRESS,
+        'network': NETWORK,
+        'message': 'Smart contract deployed successfully'
+    })
+
+
+@app.route('/api/contract/<contract_id>/execute', methods=['POST'])
+def execute_contract(contract_id):
+    data = request.json
+    function_name = data.get('function')
+    params = data.get('params', {})
+    caller = data.get('caller')
+
+    result = contract_manager.execute_contract(contract_id, function_name, params, caller)
+
+    return jsonify(result)
+
+
+@app.route('/api/contract/<contract_id>', methods=['GET'])
+def get_contract(contract_id):
+    contract = contract_manager.get_contract(contract_id)
+
+    if contract:
+        return jsonify(contract.to_dict())
+
+    return jsonify({'error': 'Contract not found'}), 404
+
+
+@app.route('/api/contracts', methods=['GET'])
+def get_all_contracts():
+    contracts = contract_manager.get_all_contracts()
+    return jsonify({
+        'count': len(contracts),
+        'contracts': contracts
+    })
+
+
+# ===== Staking Endpoints =====
+
+@app.route('/api/staking/stake', methods=['POST'])
+def stake_tokens():
+    data = request.json
+    address = data.get('address')
+    amount = data.get('amount')
+
+    token = initialize_smartcoin()
+    balance = token.balance_of(address)
+
+    if balance < amount:
+        return jsonify({'success': False, 'error': 'Insufficient balance'}), 400
+
+    # Transfer from user to staking pool
+    success = token.transfer(address, 'STAKING_POOL', amount)
+    if success:
+        staking_pool.stake(address, amount)
+        return jsonify({
+            'success': True,
+            'message': f'Staked {amount} SMC',
+            'staked_amount': amount
+        })
+
+    return jsonify({'success': False, 'error': 'Staking failed'}), 400
+
+
+@app.route('/api/staking/unstake', methods=['POST'])
+def unstake_tokens():
+    data = request.json
+    address = data.get('address')
+    amount = data.get('amount')
+
+    success = staking_pool.unstake(address, amount)
+    if success:
+        token = initialize_smartcoin()
+        token.transfer('STAKING_POOL', address, amount)
+        return jsonify({
+            'success': True,
+            'message': f'Unstaked {amount} SMC',
+            'unstaked_amount': amount
+        })
+
+    return jsonify({'success': False, 'error': 'Unstaking failed'}), 400
+
+
+@app.route('/api/staking/claim', methods=['POST'])
+def claim_rewards():
+    data = request.json
+    address = data.get('address')
+
+    rewards = staking_pool.claim_rewards(address)
+    if rewards > 0:
+        token = initialize_smartcoin()
+        token.mint(address, rewards)
+        return jsonify({
+            'success': True,
+            'message': f'Claimed {rewards:.2f} SMC rewards',
+            'rewards': rewards
+        })
+
+    return jsonify({'success': False, 'error': 'No rewards to claim'}), 400
+
+
+@app.route('/api/staking/info/<address>', methods=['GET'])
+def get_staking_info(address):
+    info = staking_pool.get_stake_info(address)
+    return jsonify(info)
+
+
+@app.route('/api/staking/pool', methods=['GET'])
+def get_pool_stats():
+    stats = staking_pool.get_pool_stats()
+    return jsonify(stats)
+
+
 def run_api(host='0.0.0.0', port=5000, debug=False):
     app.run(host=host, port=port, debug=debug, threaded=True)
 
 
 if __name__ == '__main__':
-    print("Starting Cryptocurrency API Server...")
+    print("Starting Advanced Cryptocurrency API Server...")
     print("API running at http://localhost:5000")
+    print("\n🪙  SmartCoin (SMC) Token Initialized")
+    print(f"   Contract: {SMARTCOIN_CONTRACT_ADDRESS}")
+    print(f"   Network: {NETWORK}")
+    print(f"   Price: ₹{SMARTCOIN_PRICE_INR} | ${SMARTCOIN_PRICE_USD}")
     print("\nAvailable endpoints:")
     print("  GET  /api/blockchain/info")
-    print("  GET  /api/blocks")
-    print("  GET  /api/block/<index>")
-    print("  POST /api/wallet/create")
-    print("  GET  /api/balance/<address>")
-    print("  POST /api/transaction/create")
-    print("  POST /api/mine")
-    print("  GET  /api/mempool")
-    print("  GET  /api/stats")
+    print("  GET  /api/smartcoin/info")
+    print("  GET  /api/smartcoin/balance/<address>")
+    print("  POST /api/smartcoin/transfer")
+    print("  POST /api/smartcoin/mint")
+    print("  POST /api/contract/deploy")
+    print("  GET  /api/contracts")
     run_api(debug=True)
