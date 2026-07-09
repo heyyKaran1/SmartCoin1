@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>CCI Coin - Merchant Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <script src="qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -36,9 +37,10 @@
                     <input type="number" id="paymentAmount" class="input-field" placeholder="Amount (CCI)" value="100">
                     <input type="text" id="paymentRef" class="input-field" placeholder="Reference ID (optional)">
                     <button class="btn btn-primary" onclick="generateQR()">Generate QR Code</button>
-                    <div id="qrDisplay" style="text-align: center; margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 10px; display: none;">
-                        <canvas id="qrCanvas"></canvas>
-                        <p style="margin-top: 10px; font-weight: bold;">Scan to Pay</p>
+                    <div id="qrDisplay" style="text-align: center; margin-top: 20px; padding: 20px; background: #ffffff; border-radius: 10px; display: none;">
+                        <div id="qrcode" style="display: inline-block;"></div>
+                        <p style="margin-top: 10px; font-weight: bold; color: #333;">Scan to Pay</p>
+                        <p id="qrAmount" style="color: #667eea; font-size: 1.2rem; font-weight: bold;"></p>
                     </div>
                 </section>
             </div>
@@ -80,15 +82,36 @@
             const amount = document.getElementById('paymentAmount').value;
             const wallet = document.getElementById('merchantWallet').value;
             const ref = document.getElementById('paymentRef').value;
+            const merchantName = document.getElementById('merchantName').value;
 
             if (!wallet || !amount) {
                 alert('Please enter wallet address and amount');
                 return;
             }
 
-            const paymentData = `cci:${wallet}?amount=${amount}&ref=${ref}`;
+            const paymentData = JSON.stringify({
+                type: 'cci_payment',
+                to: wallet,
+                amount: parseFloat(amount),
+                merchant: merchantName,
+                reference: ref,
+                timestamp: Date.now()
+            });
+
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+
+            new QRCode(qrContainer, {
+                text: paymentData,
+                width: 256,
+                height: 256,
+                colorDark: '#667eea',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
             document.getElementById('qrDisplay').style.display = 'block';
-            alert('QR Code generated!\nPayment Data: ' + paymentData);
+            document.getElementById('qrAmount').textContent = `${amount} CCI to ${merchantName}`;
         }
 
         async function loadMerchantPayments() {

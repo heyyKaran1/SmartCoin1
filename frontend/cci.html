@@ -500,6 +500,7 @@
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     connectedAccount = accounts[0];
+                    localStorage.setItem('metamask_connected_account', connectedAccount);
 
                     document.getElementById('walletInfo').style.display = 'block';
                     document.getElementById('connectedAddress').textContent = connectedAccount;
@@ -1018,11 +1019,28 @@
         });
 
         if (typeof window.ethereum !== 'undefined') {
+            const savedAccount = localStorage.getItem('metamask_connected_account');
+            if (savedAccount) {
+                connectedAccount = savedAccount;
+                document.getElementById('connectedAddress').textContent = connectedAccount;
+                document.getElementById('accountInfo').style.display = 'block';
+                document.getElementById('connectBtn').textContent = 'Connected';
+                document.getElementById('connectBtn').disabled = true;
+                loadSMCBalance(connectedAccount);
+            }
+
             window.ethereum.on('accountsChanged', (accounts) => {
                 if (accounts.length > 0) {
                     connectedAccount = accounts[0];
+                    localStorage.setItem('metamask_connected_account', connectedAccount);
                     document.getElementById('connectedAddress').textContent = connectedAccount;
                     loadSMCBalance(connectedAccount);
+                } else {
+                    localStorage.removeItem('metamask_connected_account');
+                    connectedAccount = null;
+                    document.getElementById('accountInfo').style.display = 'none';
+                    document.getElementById('connectBtn').textContent = 'Connect MetaMask';
+                    document.getElementById('connectBtn').disabled = false;
                 }
             });
         }
