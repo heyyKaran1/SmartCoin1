@@ -6,6 +6,7 @@
     <title>CCI Coin - QR Scanner</title>
     <link rel="stylesheet" href="style.css">
     <script src="html5-qrcode.min.js"></script>
+    <script src="web3-integration.js"></script>
     <style>
         #reader {
             width: 100%;
@@ -230,6 +231,47 @@
                 return;
             }
 
+            if (confirm('💳 Choose Payment Method:\n\n✅ OK = Use MetaMask (Web3)\n❌ Cancel = Use Internal Wallet')) {
+                await processWithMetaMask();
+            } else {
+                await processWithInternalWallet(fromWallet);
+            }
+        }
+
+        async function processWithMetaMask() {
+            if (typeof Web3Manager === 'undefined' || !Web3Manager.isConnected()) {
+                alert('Please connect MetaMask first');
+                try {
+                    await Web3Manager.connect();
+                } catch (error) {
+                    alert('MetaMask connection failed: ' + error.message);
+                    return;
+                }
+            }
+
+            try {
+                const txHash = await Web3Manager.signTransaction({
+                    to: scannedPaymentData.to,
+                    amount: scannedPaymentData.amount,
+                    data: JSON.stringify({
+                        merchant: scannedPaymentData.merchant,
+                        reference: scannedPaymentData.reference,
+                        timestamp: Date.now()
+                    })
+                });
+
+                alert('✅ Payment Successful with MetaMask!\n\nTransaction Hash: ' + txHash + '\n\nPayment is being processed on the blockchain.');
+
+                document.getElementById('paymentDetails').style.display = 'none';
+                document.getElementById('paymentForm').style.display = 'none';
+                scannedPaymentData = null;
+
+            } catch (error) {
+                alert('❌ MetaMask Payment Failed: ' + error.message);
+            }
+        }
+
+        async function processWithInternalWallet(fromWallet) {
             try {
                 const response = await fetch(`${API_URL}/transaction/merchant`, {
                     method: 'POST',

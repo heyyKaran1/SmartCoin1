@@ -14,6 +14,21 @@ function showNotification(message, type = 'info') {
     }, 4000);
 }
 
+async function getCsrfToken() {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('csrf_token='));
+    if (cookie) {
+        return cookie.split('=')[1];
+    }
+    try {
+        const response = await fetch(`${API_URL}/csrf-token`);
+        const data = await response.json();
+        return data.csrf_token;
+    } catch (error) {
+        console.error('Failed to get CSRF token:', error);
+        return null;
+    }
+}
+
 async function apiCall(endpoint, method = 'GET', body = null) {
     try {
         const options = {
@@ -21,7 +36,15 @@ async function apiCall(endpoint, method = 'GET', body = null) {
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include'
         };
+
+        if (method === 'POST' || method === 'PUT' || method === 'DELETE') {
+            const csrfToken = await getCsrfToken();
+            if (csrfToken) {
+                options.headers['X-CSRFToken'] = csrfToken;
+            }
+        }
 
         if (body) {
             options.body = JSON.stringify(body);
@@ -461,3 +484,62 @@ window.addEventListener('beforeunload', () => {
         clearInterval(refreshInterval);
     }
 });
+
+async function payWithMetaMask(event) {
+    event.preventDefault();
+
+    const toAddress = document.getElementById('recipientWallet').value;
+    const amount = parseFloat(document.getElementById('amount').value);
+    const merchantName = document.getElementById('merchantName').value;
+    const merchantId = document.getElementById('merchantId').value;
+    const purpose = document.getElementById('purpose').value;
+    const referenceId = document.getElementById('referenceId').value;
+
+    if (!toAddress || !amount) {
+        showNotification('Please fill in recipient and amount', 'error');
+        return;
+    }
+
+    if (typeof Web3Manager === 'undefined') {
+        showNotification('Web3 not loaded. Please refresh the page.', 'error');
+        return;
+    }
+
+    try {
+        if (!Web3Manager.isConnected()) {
+            showNotification('Connecting to MetaMask...', 'info');
+            await Web3Manager.connect();
+        }
+
+        showNotification('Please confirm transaction in MetaMask...', 'info');
+
+        const txHash = await Web3Manager.signTransaction({
+            to: toAddress,
+            amount: amount,
+            data: JSON.stringify({
+                merchant_name: merchantName,
+                merchant_id: merchantId,
+                purpose: purpose,
+                reference_id: referenceId,
+                payment_method: 'MetaMask',
+                timestamp: Date.now()
+            })
+        });
+
+        showNotification(`✅ Payment successful! TX: ${txHash.substring(0, 16)}...`, 'success');
+
+        document.getElementById('merchantPaymentForm').reset();
+
+        setTimeout(() => {
+            loadBlockchainInfo();
+            loadRecentBlocks();
+        }, 2000);
+
+    } catch (error) {
+        if (error.code === 4001) {
+            showNotification('Transaction rejected by user', 'error');
+        } else {
+            showNotification('MetaMask payment failed: ' + error.message, 'error');
+        }
+    }
+}

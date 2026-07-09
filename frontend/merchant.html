@@ -5,6 +5,7 @@
     <title>CCI Coin - Merchant Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="qrcode.min.js"></script>
+    <script src="websocket-client.js"></script>
 </head>
 <body>
     <div class="container">
@@ -240,6 +241,28 @@
                 loadMerchantPayments();
             }
         }, 3000);
+
+        let wsClient = null;
+        try {
+            wsClient = new WebSocketClient();
+
+            wsClient.on('payment_received', (data) => {
+                const wallet = document.getElementById('merchantWallet').value.trim();
+                if (wallet) {
+                    alert(`🎉 Payment Received!\n\nAmount: ${data.amount} CCI\nMerchant: ${data.merchant}\nTX: ${data.tx_id}`);
+                    loadMerchantPayments();
+                }
+            });
+
+            document.getElementById('merchantWallet').addEventListener('input', () => {
+                const wallet = document.getElementById('merchantWallet').value.trim();
+                if (wallet && wsClient) {
+                    wsClient.subscribe('merchant', wallet);
+                }
+            });
+        } catch (error) {
+            console.log('WebSocket not available, using polling');
+        }
     </script>
 </body>
 </html>
