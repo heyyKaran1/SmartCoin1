@@ -302,8 +302,12 @@ async function sendTransaction(event) {
     event.preventDefault();
 
     const walletId = parseInt(document.getElementById('fromWallet').value);
+    const merchantName = document.getElementById('merchantName').value.trim();
+    const merchantId = document.getElementById('merchantId').value.trim();
     const toAddress = document.getElementById('toAddress').value.trim();
     const amount = parseFloat(document.getElementById('amount').value);
+    const purpose = document.getElementById('purpose').value.trim();
+    const referenceId = document.getElementById('referenceId').value.trim();
     const fee = parseFloat(document.getElementById('fee').value);
 
     if (!walletId && walletId !== 0) {
@@ -311,33 +315,53 @@ async function sendTransaction(event) {
         return;
     }
 
+    const resultDiv = document.getElementById('txResult');
+    resultDiv.className = 'info-message';
+    resultDiv.innerHTML = `
+        <div class="loading"></div>
+        <strong>Broadcasting transaction...</strong><br>
+        Waiting for network confirmation...
+    `;
+
     try {
         const result = await apiCall('/transaction/create', 'POST', {
             wallet_id: walletId,
             to_address: toAddress,
             amount: amount,
-            fee: fee
+            fee: fee,
+            merchant_name: merchantName,
+            merchant_id: merchantId,
+            purpose: purpose,
+            reference_id: referenceId
         });
 
-        const resultDiv = document.getElementById('txResult');
         resultDiv.className = 'success-message';
         resultDiv.innerHTML = `
-            <strong>Transaction Created!</strong><br>
-            TX ID: ${result.tx_id}<br>
-            Status: ${result.message}
+            <strong>✅ Payment Confirmed!</strong><br>
+            <div style="text-align: left; margin-top: 10px; font-size: 0.9rem;">
+                <strong>Merchant:</strong> ${merchantName || 'N/A'}<br>
+                <strong>Merchant ID:</strong> ${merchantId || 'N/A'}<br>
+                <strong>Amount:</strong> ${amount} CCI<br>
+                <strong>Purpose:</strong> ${purpose || 'Payment'}<br>
+                <strong>Reference:</strong> ${referenceId || 'N/A'}<br>
+                <strong>TX ID:</strong> ${result.tx_id.substring(0, 16)}...<br>
+                <strong>Status:</strong> Confirmed in mempool
+            </div>
         `;
 
         document.getElementById('transactionForm').reset();
-        showNotification('Transaction sent to mempool!', 'success');
+        showNotification(`Payment to ${merchantName} successful!`, 'success');
 
         setTimeout(() => {
             loadMempool();
             refreshWallets();
         }, 1000);
     } catch (error) {
-        const resultDiv = document.getElementById('txResult');
         resultDiv.className = 'error-message';
-        resultDiv.textContent = error.message || 'Failed to send transaction';
+        resultDiv.innerHTML = `
+            <strong>❌ Transaction Failed</strong><br>
+            ${error.message || 'Failed to send transaction'}
+        `;
     }
 }
 
@@ -411,7 +435,7 @@ function startAutoRefresh() {
         if (wallets.length > 0) {
             refreshWallets();
         }
-    }, 5000);
+    }, 2000);
 }
 
 function toggleTheme() {

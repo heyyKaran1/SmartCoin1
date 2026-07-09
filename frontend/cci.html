@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartCoin (SMC) Dashboard</title>
+    <title>CCI Coin (CCI) Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
@@ -330,7 +330,12 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px;">
                 <div>
                     <a href="/" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">⛓️ Blockchain</a>
-                    <a href="/smartcoin.html" style="background: #fff; padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #f5576c; border-radius: 8px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">🪙 SmartCoin Token</a>
+                    <a href="/cci.html" style="background: #fff; padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #667eea; border-radius: 8px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">🪙 CCI Token</a>
+                    <a href="/merchant.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">💼 Merchant</a>
+                    <a href="/roadmap.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🗺️ Roadmap</a>
+                    <a href="/governance.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🏛️ Governance</a>
+                    <a href="/security.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🔒 Security</a>
+                    <a href="/future.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🚀 Future</a>
                 </div>
                 <label class="theme-switch" title="Toggle Dark/Light Mode">
                     <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
@@ -338,8 +343,8 @@
                 </label>
             </div>
             <div class="token-logo">🪙</div>
-            <h1>SmartCoin (SMC)</h1>
-            <p>Advanced ERC-20 Token on Polygon Network</p>
+            <h1>CCI Coin (CCI)</h1>
+            <p>Advanced ERC-20 Token on Ethereum Mainnet</p>
             <div class="price-display" id="tokenPrice">₹10.00</div>
             <p id="priceUSD">$0.12 USD</p>
         </div>
@@ -358,46 +363,46 @@
                             <span id="connectedAddress"></span>
                         </div>
                         <div>
-                            <strong>SMC Balance:</strong>
-                            <div class="wallet-balance" id="smcBalance">0 SMC</div>
+                            <strong>CCI Balance:</strong>
+                            <div class="wallet-balance" id="smcBalance">0 CCI</div>
                         </div>
                     </div>
                 </section>
 
                 <section class="card">
-                    <h2>💰 Get SmartCoins</h2>
-                    <p>Mint SMC tokens to any address</p>
+                    <h2>💰 Get CCI Coins</h2>
+                    <p>Mint CCI tokens to any address</p>
                     <input type="text" id="mintAddress" class="input-field" placeholder="Address">
                     <input type="number" id="mintAmount" class="input-field" placeholder="Amount" value="1000">
-                    <button class="btn btn-primary" onclick="mintTokens()">Mint SMC Tokens</button>
+                    <button class="btn btn-primary" onclick="mintTokens()">Mint CCI Tokens</button>
                     <div id="mintResult"></div>
                 </section>
 
                 <section class="card">
-                    <h2>🔥 Burn SmartCoins</h2>
-                    <p>Permanently remove SMC tokens from circulation</p>
+                    <h2>🔥 Burn CCI Coins</h2>
+                    <p>Permanently remove CCI tokens from circulation</p>
                     <input type="text" id="burnAddress" class="input-field" placeholder="Address">
                     <input type="number" id="burnAmount" class="input-field" placeholder="Amount" value="100">
-                    <button class="btn btn-danger" onclick="burnTokens()">Burn SMC Tokens</button>
+                    <button class="btn btn-danger" onclick="burnTokens()">Burn CCI Tokens</button>
                     <div id="burnResult"></div>
                 </section>
 
                 <section class="card">
-                    <h2>📤 Transfer SMC</h2>
+                    <h2>📤 Transfer CCI</h2>
                     <input type="text" id="transferFrom" class="input-field" placeholder="From Address">
                     <input type="text" id="transferTo" class="input-field" placeholder="To Address">
                     <input type="number" id="transferAmount" class="input-field" placeholder="Amount">
-                    <button class="btn btn-primary" onclick="transferTokens()">Transfer SMC</button>
+                    <button class="btn btn-primary" onclick="transferTokens()">Transfer CCI</button>
                     <div id="transferResult"></div>
                 </section>
 
                 <section class="card">
                     <h2>🔒 Staking (10% APY)</h2>
-                    <p>Lock SMC tokens and earn rewards</p>
+                    <p>Lock CCI tokens and earn rewards</p>
                     <input type="text" id="stakeAddress" class="input-field" placeholder="Your Address">
                     <input type="number" id="stakeAmount" class="input-field" placeholder="Amount to Stake" value="1000">
-                    <button class="btn btn-success" onclick="stakeTokens()">Stake SMC</button>
-                    <button class="btn btn-secondary" onclick="unstakeTokens()">Unstake SMC</button>
+                    <button class="btn btn-success" onclick="stakeTokens()">Stake CCI</button>
+                    <button class="btn btn-secondary" onclick="unstakeTokens()">Unstake CCI</button>
                     <button class="btn btn-primary" onclick="claimRewards()">Claim Rewards</button>
                     <div id="stakingResult"></div>
                     <div id="stakingInfo"></div>
@@ -518,17 +523,17 @@
 
         async function loadSMCBalance(address) {
             try {
-                const response = await fetch(`${API_URL}/smartcoin/balance/${address}`);
+                const response = await fetch(`${API_URL}/cci/balance/${address}`);
                 const data = await response.json();
-                document.getElementById('smcBalance').textContent = `${data.balance} SMC (₹${data.value_inr})`;
+                document.getElementById('smcBalance').textContent = `${data.balance} CCI (₹${data.value_inr})`;
             } catch (error) {
                 console.error('Failed to load balance:', error);
             }
         }
 
-        async function loadSmartCoinInfo() {
+        async function loadCCIInfo() {
             try {
-                const response = await fetch(`${API_URL}/smartcoin/info`);
+                const response = await fetch(`${API_URL}/cci/info`);
                 const data = await response.json();
 
                 document.getElementById('tokenPrice').textContent = `₹${data.price_inr}`;
@@ -548,7 +553,7 @@
                 createPriceChart(data);
 
             } catch (error) {
-                console.error('Failed to load SmartCoin info:', error);
+                console.error('Failed to load CCI Coin info:', error);
             }
         }
 
@@ -677,7 +682,7 @@
                 if (data.success) {
                     resultDiv.className = 'success-message';
                     resultDiv.textContent = data.message;
-                    showNotification(`Staked ${amount} SMC successfully!`, 'success');
+                    showNotification(`Staked ${amount} CCI successfully!`, 'success');
                     await loadStakingInfo(address);
                 } else {
                     resultDiv.className = 'error-message';
@@ -753,9 +758,9 @@
                 infoDiv.className = 'info-message';
                 infoDiv.innerHTML = `
                     <strong>Your Staking Info:</strong><br>
-                    Staked: ${data.staked} SMC<br>
-                    Pending Rewards: ${data.pending_rewards.toFixed(2)} SMC<br>
-                    Total Rewards: ${data.total_rewards.toFixed(2)} SMC<br>
+                    Staked: ${data.staked} CCI<br>
+                    Pending Rewards: ${data.pending_rewards.toFixed(2)} CCI<br>
+                    Total Rewards: ${data.total_rewards.toFixed(2)} CCI<br>
                     APY: ${data.apy}%
                 `;
             } catch (error) {
@@ -778,7 +783,7 @@
             resultDiv.className = 'info-message';
 
             try {
-                const response = await fetch(`${API_URL}/smartcoin/mint`, {
+                const response = await fetch(`${API_URL}/cci/mint`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({to_address: address, amount: amount})
@@ -789,8 +794,8 @@
                 if (data.success) {
                     resultDiv.className = 'success-message';
                     resultDiv.textContent = data.message;
-                    showNotification(`Minted ${amount} SMC successfully!`, 'success');
-                    await loadSmartCoinInfo();
+                    showNotification(`Minted ${amount} CCI successfully!`, 'success');
+                    await loadCCIInfo();
                     if (connectedAccount) await loadSMCBalance(connectedAccount);
                 } else {
                     resultDiv.className = 'error-message';
@@ -817,7 +822,7 @@
             resultDiv.className = 'info-message';
 
             try {
-                const response = await fetch(`${API_URL}/smartcoin/burn`, {
+                const response = await fetch(`${API_URL}/cci/burn`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({from_address: address, amount: amount})
@@ -828,8 +833,8 @@
                 if (data.success) {
                     resultDiv.className = 'success-message';
                     resultDiv.textContent = data.message;
-                    showNotification(`Burned ${amount} SMC successfully!`, 'success');
-                    await loadSmartCoinInfo();
+                    showNotification(`Burned ${amount} CCI successfully!`, 'success');
+                    await loadCCIInfo();
                     if (connectedAccount) await loadSMCBalance(connectedAccount);
                 } else {
                     resultDiv.className = 'error-message';
@@ -857,7 +862,7 @@
             resultDiv.className = 'info-message';
 
             try {
-                const response = await fetch(`${API_URL}/smartcoin/transfer`, {
+                const response = await fetch(`${API_URL}/cci/transfer`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({from_address: from, to_address: to, amount: amount})
@@ -868,8 +873,8 @@
                 if (data.success) {
                     resultDiv.className = 'success-message';
                     resultDiv.textContent = data.message;
-                    showNotification(`Transferred ${amount} SMC successfully!`, 'success');
-                    await loadSmartCoinInfo();
+                    showNotification(`Transferred ${amount} CCI successfully!`, 'success');
+                    await loadCCIInfo();
                     if (connectedAccount) await loadSMCBalance(connectedAccount);
                 } else {
                     resultDiv.className = 'error-message';
@@ -886,7 +891,7 @@
             const historyDiv = document.getElementById('transactionHistory');
 
             try {
-                let url = `${API_URL}/smartcoin/history?limit=50`;
+                let url = `${API_URL}/cci/history?limit=50`;
                 if (address) {
                     url += `&address=${address}`;
                 }
@@ -907,7 +912,7 @@
                             <div style="margin-top: 8px;">
                                 <strong>From:</strong> ${tx.from.substring(0, 10)}...${tx.from.substring(tx.from.length - 8)}<br>
                                 <strong>To:</strong> ${tx.to.substring(0, 10)}...${tx.to.substring(tx.to.length - 8)}<br>
-                                <strong>Amount:</strong> ${tx.amount} SMC<br>
+                                <strong>Amount:</strong> ${tx.amount} CCI<br>
                                 <strong>Time:</strong> ${date}
                             </div>
                         </div>
@@ -922,7 +927,7 @@
 
         async function loadLiveActivity() {
             try {
-                const response = await fetch(`${API_URL}/smartcoin/activity?limit=10`);
+                const response = await fetch(`${API_URL}/cci/activity?limit=10`);
                 const data = await response.json();
 
                 const activityDiv = document.getElementById('liveActivity');
@@ -954,7 +959,7 @@
         async function exportToCSV() {
             try {
                 const address = document.getElementById('historyAddress').value.trim();
-                let url = `${API_URL}/smartcoin/history?limit=1000`;
+                let url = `${API_URL}/cci/history?limit=1000`;
                 if (address) url += `&address=${address}`;
 
                 const response = await fetch(url);
@@ -975,7 +980,7 @@
                 const url2 = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url2;
-                a.download = `smartcoin_transactions_${Date.now()}.csv`;
+                a.download = `cci_transactions_${Date.now()}.csv`;
                 a.click();
                 window.URL.revokeObjectURL(url2);
 
@@ -1005,10 +1010,10 @@
                 document.body.classList.add('dark-theme');
                 document.getElementById('themeToggle').checked = true;
             }
-            loadSmartCoinInfo();
+            loadCCIInfo();
             loadLiveActivity();
             loadTransactionHistory();
-            setInterval(loadSmartCoinInfo, 10000);
+            setInterval(loadCCIInfo, 10000);
             setInterval(loadLiveActivity, 5000);
         });
 

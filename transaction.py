@@ -48,6 +48,7 @@ class Transaction:
         self.outputs = outputs
         self.timestamp = timestamp or time.time()
         self.tx_id = self.calculate_hash()
+        self.merchant_details = None
 
     def calculate_hash(self) -> str:
         tx_data = {
@@ -133,12 +134,15 @@ class Transaction:
         return total_input - total_output
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        result = {
             'tx_id': self.tx_id,
             'inputs': [inp.to_dict() for inp in self.inputs],
             'outputs': [out.to_dict() for out in self.outputs],
             'timestamp': self.timestamp
         }
+        if self.merchant_details:
+            result['merchant_details'] = self.merchant_details
+        return result
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> 'Transaction':
@@ -146,6 +150,8 @@ class Transaction:
         outputs = [TransactionOutput.from_dict(out) for out in data['outputs']]
         tx = Transaction(inputs, outputs, data['timestamp'])
         tx.tx_id = data['tx_id']
+        if 'merchant_details' in data:
+            tx.merchant_details = data['merchant_details']
         return tx
 
     @staticmethod

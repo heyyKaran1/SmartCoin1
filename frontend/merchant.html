@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CCI Coin - Merchant Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 25px; padding: 40px; margin-bottom: 30px; text-align: center;">
+            <h1 style="color: #667eea; font-size: 2.5rem;">💼 Merchant Dashboard</h1>
+            <p style="color: #666; font-size: 1.1rem;">Accept CCI Coin payments from customers</p>
+        </div>
+        <div class="nav-buttons" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+            <a href="/" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">⛓️ Blockchain</a>
+            <a href="/cci.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🪙 CCI Token</a>
+            <a href="/merchant.html" style="background: #fff; padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #667eea; border-radius: 8px; display: inline-block;">💼 Merchant</a>
+            <a href="/roadmap.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🗺️ Roadmap</a>
+            <a href="/governance.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🏛️ Governance</a>
+            <a href="/security.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🔒 Security</a>
+            <a href="/future.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🚀 Future</a>
+        </div>
+        <div class="main-content">
+            <div class="left-panel">
+                <section class="card">
+                    <h2>💰 Merchant Info</h2>
+                    <input type="text" id="merchantName" class="input-field" placeholder="Merchant Name" value="Demo Store">
+                    <input type="text" id="merchantWallet" class="input-field" placeholder="Your CCI Wallet Address">
+                    <div class="stats-grid" style="margin-top: 20px;">
+                        <div class="stat-item"><strong>Today's Revenue</strong><span id="todayRevenue">0 CCI</span></div>
+                        <div class="stat-item"><strong>Total Payments</strong><span id="totalPayments">0</span></div>
+                    </div>
+                </section>
+                <section class="card">
+                    <h2>📱 Generate QR Payment</h2>
+                    <input type="number" id="paymentAmount" class="input-field" placeholder="Amount (CCI)" value="100">
+                    <input type="text" id="paymentRef" class="input-field" placeholder="Reference ID (optional)">
+                    <button class="btn btn-primary" onclick="generateQR()">Generate QR Code</button>
+                    <div id="qrDisplay" style="text-align: center; margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 10px; display: none;">
+                        <canvas id="qrCanvas"></canvas>
+                        <p style="margin-top: 10px; font-weight: bold;">Scan to Pay</p>
+                    </div>
+                </section>
+            </div>
+            <div class="right-panel">
+                <section class="card">
+                    <h2>📊 Recent Payments</h2>
+                    <div id="recentPayments">
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 10px 0;">
+                            <strong>Payment #1</strong><br>
+                            Amount: 150 CCI<br>
+                            Time: 2 mins ago<br>
+                            Status: <span style="color: #28a745;">Confirmed</span>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 10px 0;">
+                            <strong>Payment #2</strong><br>
+                            Amount: 75 CCI<br>
+                            Time: 15 mins ago<br>
+                            Status: <span style="color: #28a745;">Confirmed</span>
+                        </div>
+                    </div>
+                </section>
+                <section class="card">
+                    <h2>⚙️ Merchant Features</h2>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 12px 0; border-bottom: 1px solid #eee;">✓ QR code payments</li>
+                        <li style="padding: 12px 0; border-bottom: 1px solid #eee;">✓ Instant settlement</li>
+                        <li style="padding: 12px 0; border-bottom: 1px solid #eee;">✓ Low transaction fees (0.5%)</li>
+                        <li style="padding: 12px 0; border-bottom: 1px solid #eee;">✓ Payment APIs</li>
+                        <li style="padding: 12px 0;">✓ Real-time analytics</li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+
+        function generateQR() {
+            const amount = document.getElementById('paymentAmount').value;
+            const wallet = document.getElementById('merchantWallet').value;
+            const ref = document.getElementById('paymentRef').value;
+
+            if (!wallet || !amount) {
+                alert('Please enter wallet address and amount');
+                return;
+            }
+
+            const paymentData = `cci:${wallet}?amount=${amount}&ref=${ref}`;
+            document.getElementById('qrDisplay').style.display = 'block';
+            alert('QR Code generated!\nPayment Data: ' + paymentData);
+        }
+
+        async function loadMerchantPayments() {
+            const wallet = document.getElementById('merchantWallet').value.trim();
+            if (!wallet) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/blocks?limit=20`);
+                const blocks = await response.json();
+
+                const payments = [];
+                let totalRevenue = 0;
+
+                for (const block of blocks) {
+                    for (const tx of block.transactions) {
+                        if (tx.merchant_details && tx.outputs) {
+                            for (const output of tx.outputs) {
+                                if (output.address === wallet) {
+                                    payments.push({
+                                        ...tx,
+                                        amount: output.amount,
+                                        timestamp: tx.timestamp
+                                    });
+                                    totalRevenue += output.amount;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                const mempoolResponse = await fetch(`${API_URL}/mempool`);
+                const mempoolData = await mempoolResponse.json();
+
+                for (const tx of mempoolData.transactions) {
+                    if (tx.merchant_details && tx.outputs) {
+                        for (const output of tx.outputs) {
+                            if (output.address === wallet) {
+                                payments.push({
+                                    ...tx,
+                                    amount: output.amount,
+                                    timestamp: tx.timestamp,
+                                    pending: true
+                                });
+                            }
+                        }
+                    }
+                }
+
+                displayPayments(payments);
+                document.getElementById('totalPayments').textContent = payments.length;
+                document.getElementById('todayRevenue').textContent = totalRevenue.toFixed(2) + ' CCI';
+            } catch (error) {
+                console.error('Failed to load payments:', error);
+            }
+        }
+
+        function displayPayments(payments) {
+            const container = document.getElementById('recentPayments');
+
+            if (payments.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No payments yet</p>';
+                return;
+            }
+
+            container.innerHTML = payments.reverse().slice(0, 10).map(payment => {
+                const date = new Date(payment.timestamp * 1000);
+                const merchant = payment.merchant_details || {};
+
+                return `
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 10px 0; border-left: 4px solid ${payment.pending ? '#ffc107' : '#28a745'};">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <strong>${merchant.merchant_name || 'Payment'}</strong>
+                            <span style="color: ${payment.pending ? '#ffc107' : '#28a745'}; font-weight: bold;">
+                                ${payment.pending ? 'Pending' : 'Confirmed'}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666;">
+                            <strong>Amount:</strong> ${payment.amount} CCI<br>
+                            ${merchant.merchant_id ? `<strong>Merchant ID:</strong> ${merchant.merchant_id}<br>` : ''}
+                            ${merchant.purpose ? `<strong>Purpose:</strong> ${merchant.purpose}<br>` : ''}
+                            ${merchant.reference_id ? `<strong>Reference:</strong> ${merchant.reference_id}<br>` : ''}
+                            <strong>TX:</strong> ${payment.tx_id.substring(0, 16)}...<br>
+                            <strong>Time:</strong> ${date.toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('merchantWallet').addEventListener('input', () => {
+            loadMerchantPayments();
+        });
+
+        setInterval(() => {
+            const wallet = document.getElementById('merchantWallet').value.trim();
+            if (wallet) {
+                loadMerchantPayments();
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

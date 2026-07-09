@@ -20,33 +20,33 @@ staking_pool = StakingPool(apy=10.0)  # 10% APY
 wallets = {}
 
 # Initialize SmartCoin Token
-SMARTCOIN_TOKEN = None
-SMARTCOIN_PRICE_INR = 10  # 1 SMC = ₹10
-SMARTCOIN_PRICE_USD = 0.12  # 1 SMC = $0.12
-SMARTCOIN_CONTRACT_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
-NETWORK = "Polygon Amoy Testnet"
+CCI_TOKEN = None
+CCI_PRICE_INR = 10  # 1 CCI = ₹10
+CCI_PRICE_USD = 0.12  # 1 CCI = $0.12
+CCI_CONTRACT_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+NETWORK = "Ethereum Mainnet"
 
-def initialize_smartcoin():
-    global SMARTCOIN_TOKEN
-    if not SMARTCOIN_TOKEN:
-        SMARTCOIN_TOKEN = token_manager.create_token(
-            name="SmartCoin",
-            symbol="SMC",
-            total_supply=100000000,  # 100 million
+def initialize_cci():
+    global CCI_TOKEN
+    if not CCI_TOKEN:
+        CCI_TOKEN = token_manager.create_token(
+            name="CCI Coin",
+            symbol="CCI",
+            total_supply=1000000000,  # 1 billion
             creator_address="GENESIS"
         )
-    return SMARTCOIN_TOKEN
+    return CCI_TOKEN
 
-initialize_smartcoin()
+initialize_cci()
 
 # Tokenomics Distribution
 TOKENOMICS = {
-    "Public Sale": 40,
-    "Team": 20,
+    "Public Sale": 30,
+    "Ecosystem Development": 20,
+    "Team & Advisors": 15,
+    "Marketing & Partnerships": 10,
     "Staking Rewards": 15,
-    "Treasury": 15,
-    "Marketing": 5,
-    "Reserve": 5
+    "Reserve Fund": 10
 }
 
 
@@ -145,6 +145,11 @@ def create_transaction():
     amount = data.get('amount')
     fee = data.get('fee', 0.1)
 
+    merchant_name = data.get('merchant_name', '')
+    merchant_id = data.get('merchant_id', '')
+    purpose = data.get('purpose', '')
+    reference_id = data.get('reference_id', '')
+
     if wallet_id not in wallets:
         return jsonify({'error': 'Wallet not found'}), 404
 
@@ -154,10 +159,22 @@ def create_transaction():
     if not transaction:
         return jsonify({'error': 'Failed to create transaction'}), 400
 
+    transaction.merchant_details = {
+        'merchant_name': merchant_name,
+        'merchant_id': merchant_id,
+        'purpose': purpose,
+        'reference_id': reference_id
+    }
+
     if blockchain.add_transaction(transaction):
         return jsonify({
             'success': True,
             'tx_id': transaction.tx_id,
+            'merchant_name': merchant_name,
+            'merchant_id': merchant_id,
+            'purpose': purpose,
+            'reference_id': reference_id,
+            'amount': amount,
             'message': 'Transaction added to mempool'
         })
 
@@ -255,12 +272,12 @@ def get_blockchain_history():
 
 # ===== SmartCoin Token Endpoints =====
 
-@app.route('/api/smartcoin/info', methods=['GET'])
-def get_smartcoin_info():
-    token = initialize_smartcoin()
+@app.route('/api/cci/info', methods=['GET'])
+def get_cci_info():
+    token = initialize_cci()
     circulating_supply = sum(token.balances.values()) - token.balance_of("GENESIS")
-    market_cap_inr = circulating_supply * SMARTCOIN_PRICE_INR
-    market_cap_usd = circulating_supply * SMARTCOIN_PRICE_USD
+    market_cap_inr = circulating_supply * CCI_PRICE_INR
+    market_cap_usd = circulating_supply * CCI_PRICE_USD
 
     return jsonify({
         'name': token.name,
@@ -268,11 +285,11 @@ def get_smartcoin_info():
         'total_supply': token.total_supply,
         'circulating_supply': circulating_supply,
         'decimals': token.decimals,
-        'price_inr': SMARTCOIN_PRICE_INR,
-        'price_usd': SMARTCOIN_PRICE_USD,
+        'price_inr': CCI_PRICE_INR,
+        'price_usd': CCI_PRICE_USD,
         'market_cap_inr': market_cap_inr,
         'market_cap_usd': market_cap_usd,
-        'contract_address': SMARTCOIN_CONTRACT_ADDRESS,
+        'contract_address': CCI_CONTRACT_ADDRESS,
         'network': NETWORK,
         'holders': len(token.balances),
         'tokenomics': TOKENOMICS,
@@ -282,36 +299,36 @@ def get_smartcoin_info():
     })
 
 
-@app.route('/api/smartcoin/balance/<address>', methods=['GET'])
-def get_smartcoin_balance(address):
-    token = initialize_smartcoin()
+@app.route('/api/cci/balance/<address>', methods=['GET'])
+def get_cci_balance(address):
+    token = initialize_cci()
     balance = token.balance_of(address)
-    value_inr = balance * SMARTCOIN_PRICE_INR
-    value_usd = balance * SMARTCOIN_PRICE_USD
+    value_inr = balance * CCI_PRICE_INR
+    value_usd = balance * CCI_PRICE_USD
 
     return jsonify({
         'address': address,
         'balance': balance,
-        'symbol': 'SMC',
+        'symbol': 'CCI',
         'value_inr': value_inr,
         'value_usd': value_usd
     })
 
 
-@app.route('/api/smartcoin/transfer', methods=['POST'])
-def transfer_smartcoin():
+@app.route('/api/cci/transfer', methods=['POST'])
+def transfer_cci():
     data = request.json
     from_address = data.get('from_address')
     to_address = data.get('to_address')
     amount = data.get('amount')
 
-    token = initialize_smartcoin()
+    token = initialize_cci()
     success = token.transfer(from_address, to_address, amount)
 
     if success:
         return jsonify({
             'success': True,
-            'message': f'Transferred {amount} SMC',
+            'message': f'Transferred {amount} CCI',
             'from': from_address,
             'to': to_address,
             'amount': amount
@@ -320,47 +337,47 @@ def transfer_smartcoin():
     return jsonify({'success': False, 'error': 'Transfer failed'}), 400
 
 
-@app.route('/api/smartcoin/mint', methods=['POST'])
-def mint_smartcoin():
+@app.route('/api/cci/mint', methods=['POST'])
+def mint_cci():
     data = request.json
     to_address = data.get('to_address')
     amount = data.get('amount')
 
-    token = initialize_smartcoin()
+    token = initialize_cci()
     success = token.mint(to_address, amount)
 
     if success:
         return jsonify({
             'success': True,
-            'message': f'Minted {amount} SMC to {to_address}',
+            'message': f'Minted {amount} CCI to {to_address}',
             'amount': amount
         })
 
     return jsonify({'success': False, 'error': 'Minting failed'}), 400
 
 
-@app.route('/api/smartcoin/burn', methods=['POST'])
-def burn_smartcoin():
+@app.route('/api/cci/burn', methods=['POST'])
+def burn_cci():
     data = request.json
     from_address = data.get('from_address')
     amount = data.get('amount')
 
-    token = initialize_smartcoin()
+    token = initialize_cci()
     success = token.burn(from_address, amount)
 
     if success:
         return jsonify({
             'success': True,
-            'message': f'Burned {amount} SMC from {from_address}',
+            'message': f'Burned {amount} CCI from {from_address}',
             'amount': amount
         })
 
     return jsonify({'success': False, 'error': 'Burn failed'}), 400
 
 
-@app.route('/api/smartcoin/history', methods=['GET'])
+@app.route('/api/cci/history', methods=['GET'])
 def get_transaction_history():
-    token = initialize_smartcoin()
+    token = initialize_cci()
     limit = request.args.get('limit', default=50, type=int)
     address = request.args.get('address')
 
@@ -375,9 +392,9 @@ def get_transaction_history():
     })
 
 
-@app.route('/api/smartcoin/activity', methods=['GET'])
+@app.route('/api/cci/activity', methods=['GET'])
 def get_live_activity():
-    token = initialize_smartcoin()
+    token = initialize_cci()
     limit = request.args.get('limit', default=10, type=int)
 
     recent = token.transaction_history[-limit:]
@@ -393,7 +410,7 @@ def get_live_activity():
 def deploy_contract():
     data = request.json
     creator = data.get('creator')
-    code = data.get('code', 'SmartCoin Contract')
+    code = data.get('code', 'CCI Coin Contract')
     initial_state = data.get('initial_state', {})
 
     contract_id = contract_manager.deploy_contract(creator, code, initial_state)
@@ -401,7 +418,7 @@ def deploy_contract():
     return jsonify({
         'success': True,
         'contract_id': contract_id,
-        'contract_address': SMARTCOIN_CONTRACT_ADDRESS,
+        'contract_address': CCI_CONTRACT_ADDRESS,
         'network': NETWORK,
         'message': 'Smart contract deployed successfully'
     })
@@ -446,7 +463,7 @@ def stake_tokens():
     address = data.get('address')
     amount = data.get('amount')
 
-    token = initialize_smartcoin()
+    token = initialize_cci()
     balance = token.balance_of(address)
 
     if balance < amount:
@@ -458,7 +475,7 @@ def stake_tokens():
         staking_pool.stake(address, amount)
         return jsonify({
             'success': True,
-            'message': f'Staked {amount} SMC',
+            'message': f'Staked {amount} CCI',
             'staked_amount': amount
         })
 
@@ -473,11 +490,11 @@ def unstake_tokens():
 
     success = staking_pool.unstake(address, amount)
     if success:
-        token = initialize_smartcoin()
+        token = initialize_cci()
         token.transfer('STAKING_POOL', address, amount)
         return jsonify({
             'success': True,
-            'message': f'Unstaked {amount} SMC',
+            'message': f'Unstaked {amount} CCI',
             'unstaked_amount': amount
         })
 
@@ -491,11 +508,11 @@ def claim_rewards():
 
     rewards = staking_pool.claim_rewards(address)
     if rewards > 0:
-        token = initialize_smartcoin()
+        token = initialize_cci()
         token.mint(address, rewards)
         return jsonify({
             'success': True,
-            'message': f'Claimed {rewards:.2f} SMC rewards',
+            'message': f'Claimed {rewards:.2f} CCI rewards',
             'rewards': rewards
         })
 
@@ -519,18 +536,19 @@ def run_api(host='0.0.0.0', port=5000, debug=False):
 
 
 if __name__ == '__main__':
-    print("Starting Advanced Cryptocurrency API Server...")
+    print("Starting CCI Coin Enterprise Platform API Server...")
     print("API running at http://localhost:5000")
-    print("\n🪙  SmartCoin (SMC) Token Initialized")
-    print(f"   Contract: {SMARTCOIN_CONTRACT_ADDRESS}")
+    print("\n🪙  CCI Coin Token Initialized")
+    print(f"   Contract: {CCI_CONTRACT_ADDRESS}")
     print(f"   Network: {NETWORK}")
-    print(f"   Price: ₹{SMARTCOIN_PRICE_INR} | ${SMARTCOIN_PRICE_USD}")
+    print(f"   Price: ₹{CCI_PRICE_INR} | ${CCI_PRICE_USD}")
+    print(f"   Total Supply: 1,000,000,000 CCI")
     print("\nAvailable endpoints:")
     print("  GET  /api/blockchain/info")
-    print("  GET  /api/smartcoin/info")
-    print("  GET  /api/smartcoin/balance/<address>")
-    print("  POST /api/smartcoin/transfer")
-    print("  POST /api/smartcoin/mint")
+    print("  GET  /api/cci/info")
+    print("  GET  /api/cci/balance/<address>")
+    print("  POST /api/cci/transfer")
+    print("  POST /api/cci/mint")
     print("  POST /api/contract/deploy")
     print("  GET  /api/contracts")
     run_api(debug=True)

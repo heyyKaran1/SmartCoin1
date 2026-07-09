@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cryptocurrency Dashboard - Advanced Blockchain System</title>
+    <title>CCI Coin Enterprise Platform - Blockchain Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
@@ -298,8 +298,8 @@
             <div class="header-content">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <h1>🪙 Cryptocurrency Dashboard</h1>
-                        <p class="subtitle">Advanced Blockchain System with ECDSA Signatures & UTXO Model</p>
+                        <h1>🪙 CCI Coin Enterprise Platform</h1>
+                        <p class="subtitle">Professional Blockchain System with ECDSA Signatures & UTXO Model</p>
                     </div>
                     <label class="theme-switch" title="Toggle Dark/Light Mode">
                         <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
@@ -308,24 +308,29 @@
                 </div>
                 <div style="margin-top: 15px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px;">
                     <a href="/" style="background: #fff; padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #667eea; border-radius: 8px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">⛓️ Blockchain</a>
-                    <a href="/smartcoin.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🪙 SmartCoin Token</a>
+                    <a href="/cci.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🪙 CCI Token</a>
+                    <a href="/merchant.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">💼 Merchant</a>
+                    <a href="/roadmap.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🗺️ Roadmap</a>
+                    <a href="/governance.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🏛️ Governance</a>
+                    <a href="/security.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🔒 Security</a>
+                    <a href="/future.html" style="background: rgba(255,255,255,0.2); padding: 12px 25px; margin: 0 10px; text-decoration: none; font-weight: bold; color: #fff; border-radius: 8px; display: inline-block; border: 2px solid white;">🚀 Future</a>
                 </div>
             </div>
             <div class="header-stats">
                 <div class="stat-card">
-                    <span class="stat-label">Total Supply</span>
+                    <span class="stat-label">CCI Supply</span>
                     <span class="stat-value" id="totalSupply">0</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Total Blocks</span>
+                    <span class="stat-label">Blockchain Height</span>
                     <span class="stat-value" id="totalBlocks">0</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Difficulty</span>
+                    <span class="stat-label">Mining Difficulty</span>
                     <span class="stat-value" id="difficulty">0</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Chain Valid</span>
+                    <span class="stat-label">Network Status</span>
                     <span class="stat-value" id="chainValid">✅</span>
                 </div>
             </div>
@@ -334,7 +339,37 @@
         <div class="main-content">
             <div class="left-panel">
                 <section class="card">
-                    <h2>👛 Wallet Manager</h2>
+                    <h2>ℹ️ Token Information</h2>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <strong>Token Name</strong>
+                            <span>CCI Coin</span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>Token Symbol</strong>
+                            <span>CCI</span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>Network</strong>
+                            <span>Ethereum</span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>Standard</strong>
+                            <span>ERC-20</span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>Total Supply</strong>
+                            <span>1,000,000,000</span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>Decimals</strong>
+                            <span>18</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2>👛 CCI Wallet</h2>
                     <button class="btn btn-primary" onclick="createWallet()">Create New Wallet</button>
 
                     <div id="walletList" class="wallet-list"></div>
@@ -348,23 +383,35 @@
                 </section>
 
                 <section class="card">
-                    <h2>💸 Send Transaction</h2>
+                    <h2>💳 Merchant Payment</h2>
                     <form id="transactionForm" onsubmit="sendTransaction(event)">
                         <label>From Wallet:</label>
                         <select id="fromWallet" class="input-field" required>
                             <option value="">Select wallet...</option>
                         </select>
 
-                        <label>To Address:</label>
-                        <input type="text" id="toAddress" class="input-field" placeholder="Recipient address" required>
+                        <label>Merchant Name:</label>
+                        <input type="text" id="merchantName" class="input-field" placeholder="Enter merchant name" required>
 
-                        <label>Amount:</label>
+                        <label>Merchant ID:</label>
+                        <input type="text" id="merchantId" class="input-field" placeholder="Enter merchant ID">
+
+                        <label>Recipient Wallet:</label>
+                        <input type="text" id="toAddress" class="input-field" placeholder="Merchant wallet address" required>
+
+                        <label>Amount (CCI):</label>
                         <input type="number" id="amount" class="input-field" placeholder="0.00" step="0.01" min="0.01" required>
 
-                        <label>Fee:</label>
+                        <label>Purpose:</label>
+                        <input type="text" id="purpose" class="input-field" placeholder="Payment purpose (e.g., Product purchase)">
+
+                        <label>Reference ID:</label>
+                        <input type="text" id="referenceId" class="input-field" placeholder="Transaction reference">
+
+                        <label>Transaction Fee:</label>
                         <input type="number" id="fee" class="input-field" placeholder="0.1" step="0.01" value="0.1" required>
 
-                        <button type="submit" class="btn btn-primary">Send Transaction</button>
+                        <button type="submit" class="btn btn-primary">Process Payment</button>
                     </form>
                     <div id="txResult"></div>
                 </section>
